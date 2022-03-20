@@ -1,0 +1,9 @@
+*.o
+*.ko
+*.symvers
+*.mod
+*.order
+*.cproject
+*.cmd
+*.project
+*.settings

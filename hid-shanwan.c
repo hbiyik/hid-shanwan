@@ -32,6 +32,7 @@
 #define USB_VENDOR_ID_SHANWAN 0x2563
 #define USB_DEVICE_ID_SHANWAN_USB_WIRELESSGAMEPAD 0x0575
 
+
 static __u8 pid0575_rdesc_fixed[] = {
 	0x05, 0x01,        /* Usage Page (Generic Desktop Ctrls) */
 	0x09, 0x05,        /* Usage (Game Pad) */
@@ -102,9 +103,11 @@ static __u8 pid0575_rdesc_fixed[] = {
 	0xC0,              /* End Collection */
 };
 
+
 struct shanwan_device {
 	struct hid_report *report;
 };
+
 
 static int shanwan_play(struct input_dev *dev, void *data, struct ff_effect *effect)
 {
@@ -136,7 +139,6 @@ static int shanwan_init(struct hid_device *hid)
 	struct hid_input *hidinput;
 	struct list_head *report_list =&hid->report_enum[HID_OUTPUT_REPORT].report_list;
 	struct input_dev *dev;
-	int error;
 
 	if (list_empty(&hid->inputs)) {
 		hid_err(hid, "no inputs found\n");
@@ -158,17 +160,14 @@ static int shanwan_init(struct hid_device *hid)
 
 	set_bit(FF_RUMBLE, dev->ffbit);
 
-	error = input_ff_create_memless(dev, shanwan, shanwan_play);
-	if (error)
-		goto err_free_mem;
+	if (input_ff_create_memless(dev, shanwan, shanwan_play)){
+		kfree(shanwan);
+		return -ENODEV;
+	}
 
 	shanwan->report = report;
 
 	return 0;
-
-err_free_mem:
-	kfree(shanwan);
-	return error;
 }
 
 
@@ -205,16 +204,19 @@ static int shanwan_probe(struct hid_device *hdev, const struct hid_device_id *id
 	return 0;
 }
 
+
 static void shanwan_remove(struct hid_device *hdev)
 {
 	hid_hw_close(hdev);
 	hid_hw_stop(hdev);
 }
 
+
 static const struct hid_device_id shanwan_devices[] = {
 	{ HID_USB_DEVICE(USB_VENDOR_ID_SHANWAN, USB_DEVICE_ID_SHANWAN_USB_WIRELESSGAMEPAD), },
 	{ }
 };
+
 
 static __u8 *shanwan_report_fixup(struct hid_device *hid, __u8 *rdesc,
 	unsigned int *rsize)
@@ -228,8 +230,6 @@ static __u8 *shanwan_report_fixup(struct hid_device *hid, __u8 *rdesc,
 }
 
 
-MODULE_DEVICE_TABLE(hid, shanwan_devices);
-
 static struct hid_driver shanwan_driver = {
 	.name			= "shanwan",
 	.id_table		= shanwan_devices,
@@ -238,8 +238,9 @@ static struct hid_driver shanwan_driver = {
 	.remove			= shanwan_remove,
 };
 
-module_hid_driver(shanwan_driver);
 
+module_hid_driver(shanwan_driver);
+MODULE_DEVICE_TABLE(hid, shanwan_devices);
 MODULE_AUTHOR("Huseyin BIYIK");
 MODULE_DESCRIPTION("Force feedback support for Shanwan USB WirelessGamepad");
 MODULE_LICENSE("GPL");

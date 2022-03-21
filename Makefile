@@ -3,12 +3,12 @@ PWD	:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 TOOLCHAIN := 
 ARCH := x86
-KDIR := /lib/modules/$(shell uname -r)
+KDIR := /lib/modules/$(shell uname -r)/build
 TCPATH :=
 
 PATH := $(TCPATH):$(PATH)
 
 all:
-	ARCH=$(ARCH) CROSS_COMPILE=$(TOOLCHAIN) $(MAKE) -C $(KDIR)/build M=$(PWD) modules
+	ARCH=$(ARCH) CROSS_COMPILE=$(TOOLCHAIN) $(MAKE) -C $(KDIR) M=$(PWD) modules
 clean:
-	ARCH=$(ARCH) CROSS_COMPILE=$(TOOLCHAIN) $(MAKE) -C $(KDIR)/build M=$(PWD) clean
+	ARCH=$(ARCH) CROSS_COMPILE=$(TOOLCHAIN) $(MAKE) -C $(KDIR) M=$(PWD) clean
